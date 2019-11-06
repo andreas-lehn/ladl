@@ -1,34 +1,35 @@
-Lehn's Architecture Description Language
-========================================
+Lehn's Architectural Description Language
+=========================================
 
 This is my favorite architectural description language.
-It allows to model (de-)composition view of an system architecture.
+It allows to model (de-)composition structures of system architectures.
 
 
 Basic concepts
 --------------
 
-The main concepts are
- * **Component**: The building blocks of a system, comparable to classes in an objekt-oriented programming language.
+The basic concepts are
+ * **Component**: The building blocks of a system, comparable to classes in an object-oriented programming language.
  * **Object**: The parts of a system.
- * **Message**: Information sent from one object to another.
- * **Port**: The Interfaces to connects objects with each other.
+ * **Message**: Information send from one object to another.
+ * **Port**: The end point of communication links between objects.
  * **Communication Link**: A connection between object to exchange messages.
 
-Each entitiy mentioned above (except communication links) have a name.
+Each entitiy mentioned above (except communication links) has an identifier as name.
 An object can send a message over a port to another object,
 that is connected to this port.
-Vice versa, objects recieve messages from port.
-
+Vice versa, objects receive messages from other object through port.
 For each port it can be specified,
 which input and output messages can be sent or recieved over that port.
-(Interface are currently not part of this architectural language.)
+(Interface are currently not part of this architectural language but it may be extended.)
+
 The statements
 
     message b, c, d
     port a in b out c, d
 
 specifies `a` port which receives messages `b` and sends out message `c` and `d`.
+
 With the following statements a component `e` with this port is specified:
 
     component e {
@@ -36,33 +37,38 @@ With the following statements a component `e` with this port is specified:
     }
 
 There is exably on port `a`.
+
 The following example shows the definitions of some components.
 
-    component avpVehicle {
-        port garage
+    message transportOrder
+    message transportStatus
+
+    component transportVehicle {
+        port control
     }
 
-    component avpGarage {
+    component controlUnit {
         port vehicle*
+        port backend
     }
 
-    component avpSystem {
-        port backend in parkingOrder out parkingStatus    
-        part avpVehicle vehicle*
-        part avpGarage
+    component transportSystem {
+        port backend in transportOrder out transportStatus    
+        part transportVehicle vehicle*
+        part controlUnit
 
-        backend -- avpGarage.oemBackEnd
-        vehicle*.garage -- avpGarage.vehicle
+        backend -- controlUnit.backend
+        vehicle*.control -- controlUnit.vehicle*
     }
 
-The `avpSystem` has a port `backend` and two parts: `vehicle` and `avpGarage`.
-`vehicle` in an object of type `avpVehicle`.
-`avpGarage` is an object of type `avpGarage`.
-It is named implicitly with the name of the class,
+The `transportSystem` has a port `backend` and two parts: `vehicle` and `controlUnit`.
+`vehicle` in an object of type `transportVehicle`.
+`controlUnit` is an object of type `controlUnit`.
+It is named implicitly with the name of the component,
 because no name is specified for that part.
 Communication links are establishe between:
- * the `backend` port of the component and the `avpGarage`
- * the `garage` port of `avpVehicle` and the `vehicle` port of the `avpGarage`
+ * the `backend` port of the component and the `controlUnit`
+ * the `garage` port of `transportVehicle` and the `vehicle` port of the `controlUnit`
 
 Ports and parts are instanciated.
 The _multiplicity_ modifiers `*`, `+`, `?` specify how often the entitiy is instantiated.
